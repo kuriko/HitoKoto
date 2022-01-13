@@ -1,10 +1,10 @@
 'use strict';
-const {sequelize, DataTypes} = require('./sequelize-loader');
+const { sequelize, DataTypes } = require('./sequelize-loader');
 
 const User = sequelize.define(
-  'users',
+  'user',
   {
-    userId: {
+    id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       allowNull: false

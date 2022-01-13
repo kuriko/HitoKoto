@@ -1,28 +1,24 @@
 'use strict';
 const { sequelize, DataTypes } = require('./sequelize-loader');
 
-const Schedule = sequelize.define(
-  'schedules',
+const Theme = sequelize.define(
+  'theme',
   {
-    scheduleId: {
+    id: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false
     },
-    scheduleName: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    memo: {
+    content: {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    createdBy: {
+    user_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    updatedAt: {
-      type: DataTypes.DATE,
+    state : {
+      type: DataTypes.INTEGER,
       allowNull: false
     }
   },
@@ -31,10 +27,10 @@ const Schedule = sequelize.define(
     timestamps: false,
     indexes: [
       {
-        fields: ['createdBy']
+        fields: ['user_id']
       }
     ]
   }
 );
 
-module.exports = Schedule;
+module.exports = Theme;

@@ -1,26 +1,26 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const Schedule = require('../models/schedule');
+const Theme = require('../models/Theme');
 const moment = require('moment-timezone');
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-  const title = '予定調整くん';
+  const title = 'HitoKoto';
   if (req.user) {
-    Schedule.findAll({
+    Theme.findAll({
       where: {
         createdBy: req.user.id
       },
       order: [['updatedAt', 'DESC']]
-    }).then((schedules) => {
-      schedules.forEach((schedule) => {
-        schedule.formattedUpdatedAt = moment(schedule.updatedAt).tz('Asia/Tokyo').format('YYYY/MM/DD HH:mm');
+    }).then((themes) => {
+      themes.forEach((theme) => {
+        theme.formattedUpdatedAt = moment(theme.updatedAt).tz('Asia/Tokyo').format('YYYY/MM/DD HH:mm');
       });
       res.render('index', {
         title: title,
         user: req.user,
-        schedules: schedules
+        themes: themes
       });
     });
   } else {
