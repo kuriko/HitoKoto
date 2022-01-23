@@ -3,6 +3,22 @@ import $ from 'jquery';
 globalThis.jQuery = $;
 import bootstrap from 'bootstrap';
 
+$('#themeInputSwitch').on('click', function() {
+  $(this).hide();
+  $('#themeForm').show();
+});
+
+$('.showHitokotoForm').on('click', function() {
+  $(this).hide();
+  $(`#HitokotoForm_${$(this).data().theme_id}`).show();
+});
+
+$('.showHitokotoList').on('click', function() {
+  $(this).hide();
+  $(`#HitokotoList_${$(this).data().theme_id}`).show();
+});
+
+/**
 $('.availability-toggle-button').each((i, e) => {
   const button = $(e);
   button.click(() => {
@@ -38,3 +54,4 @@ buttonSelfComment.click(() => {
       });
   }
 });
+ */

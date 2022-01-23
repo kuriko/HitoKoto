@@ -1,21 +1,58 @@
 extends layout
 
 block content
+
   div.jumbotron.my-3
     h1.display-4 HitoKoto
     p.lead いろんなものを一言で表してみよう！
+
   if user
-    div
-      a(href="/schedules/new").btn.btn-info 予定を作る
-    - var hasSchedule = schedules.length > 0
-    if hasSchedule
-      h3.my-3 あなたの作った予定一覧
-      table.table
-        tr
-          th 予定名
-          th 更新日時
-        each schedule in schedules
-          tr
-            td
-              a(href=`/schedules/${schedule.scheduleId}`) #{schedule.scheduleName}
-            td #{schedule.formattedUpdatedAt}
+    - var hasTheme = themes.length > 0
+    if hasTheme
+      h3.text-center.my-3 新着のテーマ
+      each theme in themes
+        div.card.mb-3
+          div.card-header.p-2
+            div.row
+              div.col-md-6.col-sm-6.col-xs-6
+                h5.card-title.m-2 #{theme.theme}
+              div.col-md-offset-6.col-md-6.col-sm-6.col-xs-6.text-right
+                button(data-theme_id=theme.theme_id).showHitokotoForm.btn.btn-info.mr-2
+                  i.far.fa-lightbulb
+                button(data-theme_id=theme.theme_id).showHitokotoList.btn.btn-info
+                  i.far.fa-comment-dots
+
+          div(id=`HitokotoForm_${theme.theme_id}` style="display: none;").card-body.p-2
+            form(method="post" action="/hitokoto")
+              input(type="hidden" name="_csrf" value!=csrfToken)
+              input(type="hidden" name="theme_id" value=theme.theme_id)
+              div.input-group
+                input(type="text" name="hitokoto" placeholder=`${theme.theme} を一言で表すと……` aria-label="Recipient's username" aria-describedby="button-addon2")#hitokotoContent.form-control
+                div.input-group-append
+                  button(type="submit").btn.btn-info 投稿
+
+          ul(id=`HitokotoList_${theme.theme_id}` style="display: none;").list-group.list-group-flush
+            each hitokoto in hitokotos
+              li.list-group-item
+                div.container.pr-0
+                  div.row
+                    div.col-md-8.col-sm-8.col-xs-8
+                      div.row
+                        a(href="#")
+                          div.hitokotoIcon
+                        span.ml-2 #{hitokoto.hitokoto}
+                    div.col-md-offset-4.col-md-4.col-sm-4.col-xs-4.text-right
+                      | by #{hitokoto.user.username}
+                      button(data-theme_id=theme.theme_id data-hitokoto_id=hitokoto.hitokoto_id).star.btn.btn-sm.btn-outline-primary.ml-2.border-0
+                        i.fas.fa-star 10
+
+    div.pb-3
+      div.text-center
+        button#themeInputSwitch.btn.btn-outline-info 新しくテーマをつくる
+      div(style='display: none;')#themeForm
+        form(method="post", action="/theme")
+          input(type="hidden" name="_csrf" value!=csrfToken)
+          div.input-group.mb-3
+            input(type="text" name="theme" placeholder="テーマ")#themeContent.form-control
+            div.input-group-append
+              button(type="submit").btn.btn-info 作成

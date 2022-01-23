@@ -20,7 +20,7 @@ const sequelize = process.env.DATABASE_URL ?
   new Sequelize(
       'postgres://postgres:postgres@db/hitokoto',
     {
-      logging: false
+      logging: true
     }
   );
 

@@ -4,7 +4,7 @@ const { sequelize, DataTypes } = require('./sequelize-loader');
 const User = sequelize.define(
   'user',
   {
-    id: {
+    user_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       allowNull: false
@@ -16,7 +16,7 @@ const User = sequelize.define(
   },
    {
     freezeTableName: true,
-    timestamps: false
+    timestamps: true,
   }
 );
 

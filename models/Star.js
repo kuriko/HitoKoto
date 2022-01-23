@@ -4,7 +4,7 @@ const { sequelize, DataTypes } = require('./sequelize-loader');
 const Star = sequelize.define(
   'star',
   {
-    id: {
+    star_id: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false
@@ -20,7 +20,7 @@ const Star = sequelize.define(
   },
   {
     freezeTableName: true,
-    timestamps: false,
+    timestamps: true,
   }
 );
 

@@ -28,8 +28,6 @@ var Star = require('./models/Star');
 
 // Auth and Session Settings
 var GitHubStrategy = require('passport-github2').Strategy;
-var GITHUB_CLIENT_ID = 'cdcc942fbc66b55cb2f0';
-var GITHUB_CLIENT_SECRET = '9705265b28b9abd432499bcc749969f82eee68a0';
 passport.serializeUser(function (user, done) { done(null, user); });
 passport.deserializeUser(function (obj, done) { done(null, obj); });
 passport.use(new GitHubStrategy({
@@ -40,7 +38,7 @@ passport.use(new GitHubStrategy({
   function (accessToken, refreshToken, profile, done) {
     process.nextTick(function () {
       User.upsert({
-        userId: profile.id,
+        user_id: profile.id,
         username: profile.username
       }).then(() => {
         done(null, profile);
@@ -67,14 +65,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Routing
-var indexRouter = require('./routes/index');
-var loginRouter = require('./routes/login');
-var logoutRouter = require('./routes/logout');
-var userRouter = require('./routes/user');
-app.use('/', indexRouter);
-app.use('/login', loginRouter);
-app.use('/logout', logoutRouter);
-app.use('/mypage', userRouter);
+app.use('/', require('./routes/index'));
+app.use('/login', require('./routes/login'));
+app.use('/logout', require('./routes/logout'));
+app.use('/mypage', require('./routes/user'));
+app.use('/theme', require('./routes/theme'));
+app.use('/hitokoto', require('./routes/hitokoto'));
 
 app.get('/auth/github',
   passport.authenticate('github', { scope: ['user:email'] }),

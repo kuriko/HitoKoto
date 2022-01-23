@@ -4,12 +4,12 @@ const { sequelize, DataTypes } = require('./sequelize-loader');
 const Hitokoto = sequelize.define(
   'hitokoto',
   {
-    id: {
+    hitokoto_id: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false
     },
-    content: {
+    hitokoto: {
       type: DataTypes.TEXT,
       allowNull: false
     },
@@ -28,7 +28,7 @@ const Hitokoto = sequelize.define(
   },
   {
     freezeTableName: true,
-    timestamps: false,
+    timestamps: true,
     indexes: [
       {
         fields: ['user_id']

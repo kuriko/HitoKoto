@@ -3,11 +3,7 @@ const express = require('express');
 const router = express.Router();
 const authenticationEnsurer = require('./authentication-ensurer');
 const uuid = require('uuid');
-const Schedule = require('../models/schedule');
-const Candidate = require('../models/candidate');
 const User = require('../models/User');
-const Availability = require('../models/availability');
-const Comment = require('../models/comment');
 const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true });
 

@@ -4,12 +4,12 @@ const { sequelize, DataTypes } = require('./sequelize-loader');
 const Theme = sequelize.define(
   'theme',
   {
-    id: {
+    theme_id: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false
     },
-    content: {
+    theme: {
       type: DataTypes.TEXT,
       allowNull: false
     },
@@ -24,7 +24,7 @@ const Theme = sequelize.define(
   },
   {
     freezeTableName: true,
-    timestamps: false,
+    timestamps: true,
     indexes: [
       {
         fields: ['user_id']

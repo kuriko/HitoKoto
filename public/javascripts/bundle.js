@@ -99,40 +99,55 @@ __webpack_require__.r(__webpack_exports__);
 
 globalThis.jQuery = jquery__WEBPACK_IMPORTED_MODULE_0___default.a;
 
-jquery__WEBPACK_IMPORTED_MODULE_0___default()('.availability-toggle-button').each(function (i, e) {
-  var button = jquery__WEBPACK_IMPORTED_MODULE_0___default()(e);
-  button.click(function () {
-    var scheduleId = button.data('schedule-id');
-    var userId = button.data('user-id');
-    var candidateId = button.data('candidate-id');
-    var availability = parseInt(button.data('availability'));
-    var nextAvailability = (availability + 1) % 3;
-    jquery__WEBPACK_IMPORTED_MODULE_0___default.a.post("/schedules/".concat(scheduleId, "/users/").concat(userId, "/candidates/").concat(candidateId), {
-      availability: nextAvailability
-    }, function (data) {
-      button.data('availability', data.availability);
-      var availabilityLabels = ['欠', '？', '出'];
-      button.text(availabilityLabels[data.availability]);
-      var buttonStyles = ['btn-danger', 'btn-secondary', 'btn-success'];
-      button.removeClass('btn-danger btn-secondary btn-success');
-      button.addClass(buttonStyles[data.availability]);
-    });
+jquery__WEBPACK_IMPORTED_MODULE_0___default()('#themeInputSwitch').on('click', function () {
+  jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).hide();
+  jquery__WEBPACK_IMPORTED_MODULE_0___default()('#themeForm').show();
+});
+jquery__WEBPACK_IMPORTED_MODULE_0___default()('.showHitokotoForm').on('click', function () {
+  jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).hide();
+  jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoForm_".concat(jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().theme_id)).show();
+});
+jquery__WEBPACK_IMPORTED_MODULE_0___default()('.showHitokotoList').on('click', function () {
+  jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).hide();
+  jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoList_".concat(jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().theme_id)).show();
+});
+/**
+$('.availability-toggle-button').each((i, e) => {
+  const button = $(e);
+  button.click(() => {
+    const scheduleId = button.data('schedule-id');
+    const userId = button.data('user-id');
+    const candidateId = button.data('candidate-id');
+    const availability = parseInt(button.data('availability'));
+    const nextAvailability = (availability + 1) % 3;
+    $.post(`/schedules/${scheduleId}/users/${userId}/candidates/${candidateId}`,
+      { availability: nextAvailability },
+      (data) => {
+        button.data('availability', data.availability);
+        const availabilityLabels = ['欠', '？', '出'];
+        button.text(availabilityLabels[data.availability]);
+
+        const buttonStyles = ['btn-danger', 'btn-secondary', 'btn-success'];
+        button.removeClass('btn-danger btn-secondary btn-success');
+        button.addClass(buttonStyles[data.availability]);
+      });
   });
 });
-var buttonSelfComment = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#self-comment-button');
-buttonSelfComment.click(function () {
-  var scheduleId = buttonSelfComment.data('schedule-id');
-  var userId = buttonSelfComment.data('user-id');
-  var comment = prompt('コメントを255文字以内で入力してください。');
 
+const buttonSelfComment = $('#self-comment-button');
+buttonSelfComment.click(() => {
+  const scheduleId = buttonSelfComment.data('schedule-id');
+  const userId = buttonSelfComment.data('user-id');
+  const comment = prompt('コメントを255文字以内で入力してください。');
   if (comment) {
-    jquery__WEBPACK_IMPORTED_MODULE_0___default.a.post("/schedules/".concat(scheduleId, "/users/").concat(userId, "/comments"), {
-      comment: comment
-    }, function (data) {
-      jquery__WEBPACK_IMPORTED_MODULE_0___default()('#self-comment').text(data.comment);
-    });
+    $.post(`/schedules/${scheduleId}/users/${userId}/comments`,
+      { comment: comment },
+      (data) => {
+        $('#self-comment').text(data.comment);
+      });
   }
 });
+ */
 
 /***/ }),
 /* 1 */
