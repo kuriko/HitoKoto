@@ -17,9 +17,7 @@ block content
               div.col-md-6.col-sm-6.col-xs-6
                 h5.card-title.m-2 #{theme.theme}
               div.col-md-offset-6.col-md-6.col-sm-6.col-xs-6.text-right
-                button(data-theme_id=theme.theme_id).showHitokotoForm.btn.btn-info.mr-2
-                  i.far.fa-lightbulb
-                button(data-theme_id=theme.theme_id).showHitokotoList.btn.btn-info
+                button(data-theme_id=theme.theme_id).showHitokotoDetail.btn.btn-info
                   i.far.fa-comment-dots
 
           div(id=`HitokotoForm_${theme.theme_id}` style="display: none;").card-body.p-2
@@ -39,7 +37,7 @@ block content
                     div.col-md-8.col-sm-8.col-xs-8
                       div.row
                         a(href="#")
-                          div.hitokotoIcon
+                          img(src=`https://avatars.githubusercontent.com/${hitokoto.user.username}`).hitokotoIcon
                         span.ml-2 #{hitokoto.hitokoto}
                     div.col-md-offset-4.col-md-4.col-sm-4.col-xs-4.text-right
                       | by #{hitokoto.user.username}

@@ -51,7 +51,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Security Settings
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'", "'unsafe-inline'"],
+      "style-src-elem": ["'self'", "https:", "'unsafe-inline'"],
+      "font-src": ["'self'", "https:", "data:"],
+      "img-src": ["'self'", "avatars.githubusercontent.com"]
+    },
+  }
+}));
 
 // Frontend Settings
 app.set('views', path.join(__dirname, 'views'));

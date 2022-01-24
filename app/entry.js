@@ -8,14 +8,9 @@ $('#themeInputSwitch').on('click', function() {
   $('#themeForm').show();
 });
 
-$('.showHitokotoForm').on('click', function() {
-  $(this).hide();
-  $(`#HitokotoForm_${$(this).data().theme_id}`).show();
-});
-
-$('.showHitokotoList').on('click', function() {
-  $(this).hide();
-  $(`#HitokotoList_${$(this).data().theme_id}`).show();
+$('.showHitokotoDetail').on('click', function() {
+  $(`#HitokotoForm_${$(this).data().theme_id}`).toggle();
+  $(`#HitokotoList_${$(this).data().theme_id}`).toggle();
 });
 
 /**

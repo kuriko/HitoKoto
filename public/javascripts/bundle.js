@@ -103,13 +103,9 @@ jquery__WEBPACK_IMPORTED_MODULE_0___default()('#themeInputSwitch').on('click', f
   jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).hide();
   jquery__WEBPACK_IMPORTED_MODULE_0___default()('#themeForm').show();
 });
-jquery__WEBPACK_IMPORTED_MODULE_0___default()('.showHitokotoForm').on('click', function () {
-  jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).hide();
-  jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoForm_".concat(jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().theme_id)).show();
-});
-jquery__WEBPACK_IMPORTED_MODULE_0___default()('.showHitokotoList').on('click', function () {
-  jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).hide();
-  jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoList_".concat(jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().theme_id)).show();
+jquery__WEBPACK_IMPORTED_MODULE_0___default()('.showHitokotoDetail').on('click', function () {
+  jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoForm_".concat(jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().theme_id)).toggle();
+  jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoList_".concat(jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().theme_id)).toggle();
 });
 /**
 $('.availability-toggle-button').each((i, e) => {
