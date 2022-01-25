@@ -6,28 +6,34 @@ const uuid = require('uuid');
 const User = require('../models/User');
 const Theme = require('../models/Theme');
 const Hitokoto = require('../models/Hitokoto');
+const Star = require('../models/Star');
 const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true });
 
-router.post('/', authenticationEnsurer, csrfProtection, (req, res, next) => {
-  const hitokoto = {
-    hitokoto_id: uuid.v4(),
-    hitokoto: req.body.hitokoto.slice(0, 255) || '（名称未設定）',
-    theme_id: req.body.theme_id,
-    user_id: req.user.id, 
-    state: 0
-  }
-  Hitokoto.create(hitokoto).then(() => {
-    res.redirect('/');
+router.post('/:hitokoto_id/star', authenticationEnsurer, csrfProtection, (req, res, next) => {
+  const resJson = {};
+  Star.upsert({
+    hitokoto_id: req.params.hitokoto_id,
+    user_id: req.user.id,
+    stared: Number(req.body.stared) === 1 ? 0 : 1
+  }).then((stars) => {
+    resJson.stared = stars[0].stared;
+    return Star.sum('stared', { where: { hitokoto_id: req.params.hitokoto_id }});
+  }).then((starCount) => {
+    resJson.starCount = starCount;
+    return Hitokoto.update({ star_count: starCount }, { where: { hitokoto_id: req.params.hitokoto_id }});
+  }).then(() => {
+    res.json(resJson);
   });
 });
 
-router.delete('/:id', authenticationEnsurer, csrfProtection, (req, res, next) => {
+router.delete('/:hitokoto_id', authenticationEnsurer, csrfProtection, (req, res, next) => {
   Hitokoto.update(
     { state: 1 },
-    { where: { hitokoto_id: req.params.id }}
+    { where: {
+      hitokoto_id: req.params.hitokoto_id,
+    }}
   ).then((hitokoto) => {
-    console.log(2)
     res.json(['success']);
   });
 });

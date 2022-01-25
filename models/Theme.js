@@ -19,7 +19,8 @@ const Theme = sequelize.define(
     },
     state : {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      defaultValue: 0
     }
   },
   {

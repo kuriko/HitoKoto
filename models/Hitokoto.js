@@ -21,9 +21,15 @@ const Hitokoto = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    star_count: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
     state : {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      defaultValue: 0
     }
   },
   {

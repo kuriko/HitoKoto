@@ -5,6 +5,7 @@
 1. docker-compose up -d
 1. docker-compose exec db bash 
   1. psql
+  1. drop database hitokoto
   1. create database hitokoto 
 1. docker-compose exec app bash
   1. yarn install

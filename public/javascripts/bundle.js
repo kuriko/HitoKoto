@@ -108,20 +108,6 @@ jquery__WEBPACK_IMPORTED_MODULE_0___default()('.showHitokotoDetail').on('click',
   jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoForm_".concat(theme_id)).toggle();
   jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoList_".concat(theme_id)).toggle();
 });
-jquery__WEBPACK_IMPORTED_MODULE_0___default()('.createTheme').on('click', function () {
-  var data = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data();
-  jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
-    url: "/theme",
-    type: "POST",
-    data: {
-      theme: jquery__WEBPACK_IMPORTED_MODULE_0___default()('#themeInput').val(),
-      _csrf: data.csrf
-    },
-    success: function success(msg) {
-      console.log(msg);
-    }
-  });
-});
 jquery__WEBPACK_IMPORTED_MODULE_0___default()('.createHitokoto').on('click', function () {
   var data = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data();
   jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
@@ -131,8 +117,23 @@ jquery__WEBPACK_IMPORTED_MODULE_0___default()('.createHitokoto').on('click', fun
       hitokoto: jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoInput_".concat(data.theme_id)).val(),
       _csrf: data.csrf
     },
-    success: function success(msg) {
-      console.log(msg);
+    success: function success(hitokoto) {
+      var hitokotoTemplate = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#Hitokoto_template").clone(true);
+      hitokotoTemplate.attr('id', "Hitokoto_".concat(hitokoto.theme.theme_id));
+      hitokotoTemplate.find('.hitokotoIconLink').attr('href', "https://github.com/".concat(hitokoto.user.username));
+      hitokotoTemplate.find('.hitokotoIcon').attr('src', "https://avatars.githubusercontent.com/".concat(hitokoto.user.username));
+      hitokotoTemplate.find('.hitokoto').text(hitokoto.hitokoto);
+      hitokotoTemplate.find('.name').text("by ".concat(hitokoto.user.username));
+      hitokotoTemplate.find('.star').attr({
+        'data-theme_id': hitokoto.theme.theme_id,
+        'data-hitokoto_id': hitokoto.hitokoto_id
+      });
+      hitokotoTemplate.find('.deleteHitokoto').attr({
+        'data-theme_id': hitokoto.theme.theme_id,
+        'data-hitokoto_id': hitokoto.hitokoto_id
+      });
+      jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoList_".concat(hitokoto.theme.theme_id)).prepend(hitokotoTemplate);
+      hitokotoTemplate.show();
     }
   });
 });
@@ -152,55 +153,36 @@ jquery__WEBPACK_IMPORTED_MODULE_0___default()('.deleteTheme').on('click', functi
 });
 jquery__WEBPACK_IMPORTED_MODULE_0___default()('.deleteHitokoto').on('click', function () {
   if (!confirm('本当に削除しますか？')) return;
-  var hitokoto_id = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().hitokoto_id;
+  var data = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data();
   jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
-    url: "/hitokoto/".concat(hitokoto_id),
+    url: "/hitokoto/".concat(data.hitokoto_id),
     type: "DELETE",
     data: {
       _csrf: jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().csrf
     },
     success: function success(msg) {
-      jquery__WEBPACK_IMPORTED_MODULE_0___default()("#Hitokoto_".concat(hitokoto_id)).fadeOut();
+      jquery__WEBPACK_IMPORTED_MODULE_0___default()("#Hitokoto_".concat(data.hitokoto_id)).fadeOut();
     }
   });
 });
-/**
-$('.availability-toggle-button').each((i, e) => {
-  const button = $(e);
-  button.click(() => {
-    const scheduleId = button.data('schedule-id');
-    const userId = button.data('user-id');
-    const candidateId = button.data('candidate-id');
-    const availability = parseInt(button.data('availability'));
-    const nextAvailability = (availability + 1) % 3;
-    $.post(`/schedules/${scheduleId}/users/${userId}/candidates/${candidateId}`,
-      { availability: nextAvailability },
-      (data) => {
-        button.data('availability', data.availability);
-        const availabilityLabels = ['欠', '？', '出'];
-        button.text(availabilityLabels[data.availability]);
-
-        const buttonStyles = ['btn-danger', 'btn-secondary', 'btn-success'];
-        button.removeClass('btn-danger btn-secondary btn-success');
-        button.addClass(buttonStyles[data.availability]);
-      });
+jquery__WEBPACK_IMPORTED_MODULE_0___default()('.star').on('click', function () {
+  var $star = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this);
+  var data = $star.data();
+  jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
+    url: "/hitokoto/".concat(data.hitokoto_id, "/star"),
+    type: "POST",
+    data: {
+      stared: data.stared,
+      _csrf: data.csrf
+    },
+    success: function success(res) {
+      $star.data('stared', res.stared);
+      $star.toggleClass('btn-outline-primary');
+      $star.toggleClass('btn-outline-secondary');
+      $star.children().text(" " + res.starCount);
+    }
   });
 });
-
-const buttonSelfComment = $('#self-comment-button');
-buttonSelfComment.click(() => {
-  const scheduleId = buttonSelfComment.data('schedule-id');
-  const userId = buttonSelfComment.data('user-id');
-  const comment = prompt('コメントを255文字以内で入力してください。');
-  if (comment) {
-    $.post(`/schedules/${scheduleId}/users/${userId}/comments`,
-      { comment: comment },
-      (data) => {
-        $('#self-comment').text(data.comment);
-      });
-  }
-});
- */
 
 /***/ }),
 /* 1 */

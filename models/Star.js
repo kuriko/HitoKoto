@@ -4,18 +4,20 @@ const { sequelize, DataTypes } = require('./sequelize-loader');
 const Star = sequelize.define(
   'star',
   {
-    star_id: {
+    hitokoto_id: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false
     },
-    hitokoto_id: {
-      type: DataTypes.UUID,
-      allowNull: false
-    },
     user_id: {
       type: DataTypes.INTEGER,
+      primaryKey: true,
       allowNull: false
+    },
+    stared: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
     }
   },
   {
