@@ -9,8 +9,65 @@ $('#themeInputSwitch').on('click', function() {
 });
 
 $('.showHitokotoDetail').on('click', function() {
-  $(`#HitokotoForm_${$(this).data().theme_id}`).toggle();
-  $(`#HitokotoList_${$(this).data().theme_id}`).toggle();
+  const theme_id = $(this).data().theme_id
+  $(`#HitokotoForm_${theme_id}`).toggle();
+  $(`#HitokotoList_${theme_id}`).toggle();
+});
+
+$('.createTheme').on('click', function() {
+  const data = $(this).data();
+  $.ajax({
+    url: `/theme`,
+    type: "POST",
+    data: {
+      theme: $('#themeInput').val(),
+      _csrf: data.csrf
+    },
+    success: function(msg) {
+      console.log(msg);
+    }
+  });
+});
+
+$('.createHitokoto').on('click', function() {
+  const data = $(this).data();
+  $.ajax({
+    url: `/theme/${data.theme_id}/hitokoto`,
+    type: "POST",
+    data: {
+      hitokoto: $(`#HitokotoInput_${data.theme_id}`).val(),
+      _csrf: data.csrf
+    },
+    success: function(msg) {
+      console.log(msg);
+    }
+  });
+});
+
+$('.deleteTheme').on('click', function() {
+  if (!confirm('本当に削除しますか？')) return;
+  const theme_id = $(this).data().theme_id
+  $.ajax({
+    url: `/theme/${theme_id}`,
+    type: "DELETE",
+    data: { _csrf: $(this).data().csrf },
+    success: function(msg) {
+      $(`#Theme_${theme_id}`).fadeOut();
+    }
+  });
+});
+
+$('.deleteHitokoto').on('click', function() {
+  if (!confirm('本当に削除しますか？')) return;
+  const hitokoto_id = $(this).data().hitokoto_id
+  $.ajax({
+    url: `/hitokoto/${hitokoto_id}`,
+    type: "DELETE",
+    data: { _csrf: $(this).data().csrf },
+    success: function(msg) {
+      $(`#Hitokoto_${hitokoto_id}`).fadeOut();
+    }
+  });
 });
 
 /**

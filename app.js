@@ -57,7 +57,7 @@ app.use(helmet({
       defaultSrc: ["'self'", "'unsafe-inline'"],
       "style-src-elem": ["'self'", "https:", "'unsafe-inline'"],
       "font-src": ["'self'", "https:", "data:"],
-      "img-src": ["'self'", "avatars.githubusercontent.com"]
+      "img-src": ["'self'", "https:", "data:"]
     },
   }
 }));

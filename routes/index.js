@@ -12,7 +12,17 @@ const Hitokoto = require('../models/Hitokoto');
 router.get('/', csrfProtection, (req, res, next) => {
   const title = 'HitoKoto';
   if (req.user) {
-    const themePromise = Theme.findAll({});
+    const themePromise = Theme.findAll({
+      include: [
+        {
+          model: User,
+          attributes: ['user_id', 'username']
+        },],
+      where: {
+        state: 0
+      },
+      order: [['updatedAt', 'DESC']]
+    });
     const hitokotoPromise = Hitokoto.findAll({
       include: [
         {
@@ -22,7 +32,10 @@ router.get('/', csrfProtection, (req, res, next) => {
         {
           model: Theme,
           attributes: ['theme_id', 'theme']
-        },],
+        }],
+      where: {
+        state: 0
+      },
       order: [['updatedAt', 'DESC']]
     });
 

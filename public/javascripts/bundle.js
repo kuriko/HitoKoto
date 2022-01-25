@@ -104,8 +104,65 @@ jquery__WEBPACK_IMPORTED_MODULE_0___default()('#themeInputSwitch').on('click', f
   jquery__WEBPACK_IMPORTED_MODULE_0___default()('#themeForm').show();
 });
 jquery__WEBPACK_IMPORTED_MODULE_0___default()('.showHitokotoDetail').on('click', function () {
-  jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoForm_".concat(jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().theme_id)).toggle();
-  jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoList_".concat(jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().theme_id)).toggle();
+  var theme_id = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().theme_id;
+  jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoForm_".concat(theme_id)).toggle();
+  jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoList_".concat(theme_id)).toggle();
+});
+jquery__WEBPACK_IMPORTED_MODULE_0___default()('.createTheme').on('click', function () {
+  var data = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data();
+  jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
+    url: "/theme",
+    type: "POST",
+    data: {
+      theme: jquery__WEBPACK_IMPORTED_MODULE_0___default()('#themeInput').val(),
+      _csrf: data.csrf
+    },
+    success: function success(msg) {
+      console.log(msg);
+    }
+  });
+});
+jquery__WEBPACK_IMPORTED_MODULE_0___default()('.createHitokoto').on('click', function () {
+  var data = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data();
+  jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
+    url: "/theme/".concat(data.theme_id, "/hitokoto"),
+    type: "POST",
+    data: {
+      hitokoto: jquery__WEBPACK_IMPORTED_MODULE_0___default()("#HitokotoInput_".concat(data.theme_id)).val(),
+      _csrf: data.csrf
+    },
+    success: function success(msg) {
+      console.log(msg);
+    }
+  });
+});
+jquery__WEBPACK_IMPORTED_MODULE_0___default()('.deleteTheme').on('click', function () {
+  if (!confirm('本当に削除しますか？')) return;
+  var theme_id = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().theme_id;
+  jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
+    url: "/theme/".concat(theme_id),
+    type: "DELETE",
+    data: {
+      _csrf: jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().csrf
+    },
+    success: function success(msg) {
+      jquery__WEBPACK_IMPORTED_MODULE_0___default()("#Theme_".concat(theme_id)).fadeOut();
+    }
+  });
+});
+jquery__WEBPACK_IMPORTED_MODULE_0___default()('.deleteHitokoto').on('click', function () {
+  if (!confirm('本当に削除しますか？')) return;
+  var hitokoto_id = jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().hitokoto_id;
+  jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
+    url: "/hitokoto/".concat(hitokoto_id),
+    type: "DELETE",
+    data: {
+      _csrf: jquery__WEBPACK_IMPORTED_MODULE_0___default()(this).data().csrf
+    },
+    success: function success(msg) {
+      jquery__WEBPACK_IMPORTED_MODULE_0___default()("#Hitokoto_".concat(hitokoto_id)).fadeOut();
+    }
+  });
 });
 /**
 $('.availability-toggle-button').each((i, e) => {

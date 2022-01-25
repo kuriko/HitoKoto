@@ -17,9 +17,18 @@ router.post('/', authenticationEnsurer, csrfProtection, (req, res, next) => {
     user_id: req.user.id, 
     state: 0
   }
-  console.log(JSON.stringify(hitokoto));
   Hitokoto.create(hitokoto).then(() => {
     res.redirect('/');
+  });
+});
+
+router.delete('/:id', authenticationEnsurer, csrfProtection, (req, res, next) => {
+  Hitokoto.update(
+    { state: 1 },
+    { where: { hitokoto_id: req.params.id }}
+  ).then((hitokoto) => {
+    console.log(2)
+    res.json(['success']);
   });
 });
 
