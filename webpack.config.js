@@ -4,7 +4,8 @@ module.exports = {
   mode: 'none',
   output: {
     path: __dirname + '/public/javascripts',
-    filename: 'bundle.js'
+    filename: 'bundle.js',
+    hashFunction: "xxhash64"
   },
   module: {
     rules: [{
