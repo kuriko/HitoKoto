@@ -1,29 +1,46 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const authenticationEnsurer = require('../lib/authentication-ensurer');
-const uuid = require('uuid');
+const authenticationEnsurer = require('../lib/authenticationEnsurer');
 const User = require('../models/User');
 const Theme = require('../models/Theme');
 const Hitokoto = require('../models/Hitokoto');
 const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true });
 
+/**
+ * テーマ投稿
+ */
 router.post('/', authenticationEnsurer, csrfProtection, (req, res, next) => {
+
+  // 内容が空の場合は処理しない
+  if(!req.body.theme.trim()) {
+    res.redirect('/');
+    return;
+  }
+
   const theme = {
-    theme_id: uuid.v4(),
     user_id: req.user.id,
-    theme: req.body.theme.slice(0, 255) || '（名称未設定）',
+    theme: req.body.theme.slice(0, 50),
   }
   Theme.create(theme).then(() => {
     res.redirect('/');
   });
 });
 
+/**
+ * 指定のテーマにHitoKotoを投稿
+ */
 router.post('/:theme_id/hitokoto', authenticationEnsurer, csrfProtection, (req, res, next) => {
+  
+  // 内容が空の場合は処理しない
+  if(!req.body.hitokoto.trim()) {
+    res.redirect('/');
+    return;
+  }
+
   const hitokoto = {
-    hitokoto_id: uuid.v4(),
-    hitokoto: req.body.hitokoto.slice(0, 255) || '（名称未設定）',
+    hitokoto: req.body.hitokoto.slice(0, 255),
     theme_id: req.params.theme_id,
     user_id: req.user.id
   }
@@ -39,10 +56,13 @@ router.post('/:theme_id/hitokoto', authenticationEnsurer, csrfProtection, (req, 
   });
 });
 
+/**
+ * テーマ削除
+ */
 router.delete('/:id', authenticationEnsurer, csrfProtection, (req, res, next) => {
   Theme.update(
     { state: 1 },
-    { where: { theme_id: req.params.id }}
+    { where: { theme_id: req.params.id, user_id: req.user.id}}
   ).then((theme) => {
     res.json(['success']);
   });

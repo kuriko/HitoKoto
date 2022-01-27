@@ -5,8 +5,9 @@ const Theme = sequelize.define(
   'theme',
   {
     theme_id: {
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER,
       primaryKey: true,
+      autoIncrement: true,
       allowNull: false
     },
     theme: {
@@ -18,7 +19,7 @@ const Theme = sequelize.define(
       allowNull: false
     },
     state : {
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER, // 0:生存 1:論理削除
       allowNull: false,
       defaultValue: 0
     }

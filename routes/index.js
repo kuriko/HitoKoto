@@ -1,15 +1,16 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const moment = require('moment-timezone');
 const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true });
-const { sequelize, DataTypes } = require('../models/sequelize-loader');
 const User = require('../models/User');
 const Theme = require('../models/Theme');
 const Hitokoto = require('../models/Hitokoto');
 const Star = require('../models/Star');
 
+/**
+ * TOP ページ
+ */
 router.get('/', csrfProtection, (req, res, next) => {
   Promise.all([getThemes(), getHitikotos(req.user)]).then((datas) => {
     res.render('index', {
@@ -22,6 +23,10 @@ router.get('/', csrfProtection, (req, res, next) => {
   });
 });
 
+/**
+ * テーマ一覧の取得
+ * @returns テーマ一覧
+ */
 function getThemes() {
   return Theme.findAll({
     include: [{ model: User, attributes: ['user_id', 'username'] }],
@@ -30,6 +35,11 @@ function getThemes() {
   });
 }
 
+/**
+ * Hitokoto一覧の取得
+ * ログイン済みの場合はいいね済みかどうかのデータも含める
+ * @returns Hitokoto一覧
+ */
 function getHitikotos(user) {
   const hitokotoQuery = {
     include: [
@@ -40,6 +50,7 @@ function getHitikotos(user) {
     order: [['createdAt', 'DESC']]
   }
   if (user) {
+    // いいね済みのデータを取得
     hitokotoQuery.include.push({
       model: Star, 
       attributes: ['hitokoto_id', 'user_id', 'stared'],

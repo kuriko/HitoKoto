@@ -5,8 +5,9 @@ const Hitokoto = sequelize.define(
   'hitokoto',
   {
     hitokoto_id: {
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER,
       primaryKey: true,
+      autoIncrement: true,
       allowNull: false
     },
     hitokoto: {
@@ -14,7 +15,7 @@ const Hitokoto = sequelize.define(
       allowNull: false
     },
     theme_id: {
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER,
       allowNull: false
     },
     user_id: {

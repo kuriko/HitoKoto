@@ -5,7 +5,7 @@ const Star = sequelize.define(
   'star',
   {
     hitokoto_id: {
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER,
       primaryKey: true,
       allowNull: false
     },

@@ -1,19 +1,21 @@
 'use strict';
 import $ from 'jquery';
 globalThis.jQuery = $;
-import bootstrap from 'bootstrap';
 
+// テーマを投稿するフォームの切り替え
 $('#themeInputSwitch').on('click', function() {
   $(this).hide();
   $('#themeForm').show();
 });
 
+// HitoKotoの表示切替
 $('.showHitokotoDetail').on('click', function() {
   const theme_id = $(this).data().theme_id
   $(`#HitokotoForm_${theme_id}`).toggle();
   $(`#HitokotoList_${theme_id}`).toggle();
 });
 
+// HitoKotoの投稿
 $('.createHitokoto').on('click', function() {
   const data = $(this).data();
   $.ajax({
@@ -24,13 +26,14 @@ $('.createHitokoto').on('click', function() {
       _csrf: data.csrf
     },
     success: function(hitokoto) {
+      // リロードしたくないので、投稿に成功したらテンプレをコピーして投稿内容を再現する
       const hitokotoTemplate = $("#Hitokoto_template").clone(true);
       hitokotoTemplate.attr('id', `Hitokoto_${hitokoto.theme.theme_id}`);
       hitokotoTemplate.find('.hitokotoIconLink').attr('href', `https://github.com/${hitokoto.user.username}`);
       hitokotoTemplate.find('.hitokotoIcon').attr('src', `https://avatars.githubusercontent.com/${hitokoto.user.username}`);
       hitokotoTemplate.find('.hitokoto').text(hitokoto.hitokoto);
       hitokotoTemplate.find('.name').text(`by ${hitokoto.user.username}`);
-      hitokotoTemplate.find('.star').attr({
+      hitokotoTemplate.find('.starButton').attr({
         'data-theme_id': hitokoto.theme.theme_id,
         'data-hitokoto_id': hitokoto.hitokoto_id
       });
@@ -44,6 +47,7 @@ $('.createHitokoto').on('click', function() {
   });
 });
 
+// テーマの削除
 $('.deleteTheme').on('click', function() {
   if (!confirm('本当に削除しますか？')) return;
   const theme_id = $(this).data().theme_id
@@ -57,6 +61,7 @@ $('.deleteTheme').on('click', function() {
   });
 });
 
+// HitoKotoの削除
 $('.deleteHitokoto').on('click', function() {
   if (!confirm('本当に削除しますか？')) return;
   const data = $(this).data();
@@ -70,6 +75,7 @@ $('.deleteHitokoto').on('click', function() {
   });
 });
 
+// ★（いいね）の追加＆取り消し
 $('.starButton').on('click', function() {
   const $star = $(this);
   const data = $star.data();
@@ -82,9 +88,9 @@ $('.starButton').on('click', function() {
     },
     success: function(res) {
       $star.data('stared', res.stared);
+      $star.children().text(" " + res.starCount);
       $star.toggleClass('btn-outline-primary');
       $star.toggleClass('btn-outline-secondary');
-      $star.children().text(" " + res.starCount);
     }
   });
 });

@@ -1,15 +1,15 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const authenticationEnsurer = require('./authentication-ensurer');
-const uuid = require('uuid');
-const User = require('../models/User');
-const Theme = require('../models/Theme');
+const authenticationEnsurer = require('../lib/authenticationEnsurer');
 const Hitokoto = require('../models/Hitokoto');
 const Star = require('../models/Star');
 const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true });
 
+/**
+ * 指定のHitoKotoにいいねをつける
+ */
 router.post('/:hitokoto_id/star', authenticationEnsurer, csrfProtection, (req, res, next) => {
   const resJson = {};
   Star.upsert({
@@ -27,12 +27,13 @@ router.post('/:hitokoto_id/star', authenticationEnsurer, csrfProtection, (req, r
   });
 });
 
+/**
+ * 指定のHitoKotoを削除
+ */
 router.delete('/:hitokoto_id', authenticationEnsurer, csrfProtection, (req, res, next) => {
   Hitokoto.update(
     { state: 1 },
-    { where: {
-      hitokoto_id: req.params.hitokoto_id,
-    }}
+    { where: { hitokoto_id: req.params.hitokoto_id, user_id: req.user.id}}
   ).then((hitokoto) => {
     res.json(['success']);
   });

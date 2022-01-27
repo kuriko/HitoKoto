@@ -1,30 +1,31 @@
 'use strict';
 const {Sequelize, DataTypes} = require('sequelize');
-const dialectOptions = {
-  ssl: {
-    require: true,
-    rejectUnauthorized: false
-  }
-};
-const sequelize = process.env.DATABASE_URL ?
-  // 本番環境
-  new Sequelize(
+
+// 本番環境用
+function createProd() {
+  return new Sequelize(
     process.env.DATABASE_URL,
     {
       logging: false,
-      dialectOptions
-    }
-  )
-  :
-  // 開発環境
-  new Sequelize(
-      'postgres://postgres:postgres@db/hitokoto',
-    {
-      logging: true
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
+      }
     }
   );
+}
+
+// 開発環境用
+function createDev() {
+  return new Sequelize(
+    'postgres://postgres:postgres@db/hitokoto',
+    { logging: true }
+  );
+}
 
 module.exports = {
-  sequelize,
+  sequelize: process.env.DATABASE_URL ? createProd() : createDev(),
   DataTypes
 };
