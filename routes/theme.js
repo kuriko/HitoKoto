@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const authenticationEnsurer = require('./authentication-ensurer');
+const authenticationEnsurer = require('../lib/authentication-ensurer');
 const uuid = require('uuid');
 const User = require('../models/User');
 const Theme = require('../models/Theme');

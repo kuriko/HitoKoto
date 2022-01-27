@@ -75,9 +75,6 @@ app.use(cookieParser());
 
 // Routing
 app.use('/', require('./routes/index'));
-app.use('/login', require('./routes/login'));
-app.use('/logout', require('./routes/logout'));
-app.use('/mypage', require('./routes/user'));
 app.use('/theme', require('./routes/theme'));
 app.use('/hitokoto', require('./routes/hitokoto'));
 
@@ -98,6 +95,19 @@ app.get('/auth/github/callback',
     } else {
       res.redirect('/');
     }
+});
+
+app.get('/login', (req, res, next) => {
+  const from = req.query.from;
+  if (from) {
+    res.cookie('loginFrom', from, { expires: new Date(Date.now() + 600000)});
+  }
+  res.render('login');
+});
+
+app.get('/logout', (req, res, next) => {
+  req.logout();
+  res.redirect('/');
 });
 
 // Error Routing

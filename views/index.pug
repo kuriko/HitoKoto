@@ -48,8 +48,8 @@ block content
                       | by #{hitokoto.user.username}
                       //- Star
                       - let classess = [];
-                      - classess.push((hitokoto.star && hitokoto.star.stared) ? 'btn-outline-primary' : 'btn-outline-secondary');
                       - classess.push(user ? 'starButton' : '');
+                      - classess.push((hitokoto.star && hitokoto.star.stared) ? 'btn-outline-primary' : 'btn-outline-secondary');
                       button(
                         data-theme_id=theme.theme_id 
                         data-hitokoto_id=hitokoto.hitokoto_id 
