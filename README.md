@@ -25,7 +25,8 @@
   1. npx webpack
   1. PORT=8000 GITHUB_CLIENT_ID=xxx GITHUB_CLIENT_SECRET=yyy yarn start
 
-## サーバーが立ち上がったら、以下のURLにアクセスします。
+## 開発環境アプリへのアクセス
+サーバーが立ち上がったら、以下のURLにアクセスします。
 http://localhost:8000
 
 ## 利用規約およびプライバシーポリシー
