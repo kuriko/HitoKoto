@@ -26,3 +26,8 @@ N予備校2021年度プログラミング入門コースで学ぶDocker環境の
 
 ## サーバーが立ち上がったら、以下のURLにアクセスします。  
 http://localhost:8000
+
+## 利用規約およびプライバシーポリシー
+以下をご覧ください。
+
+[HitoKoto利用規約およびプライバシーポリシー](https://github.com/kuriko/HitoKoto/blob/main/Terms_and_Policies.md)
