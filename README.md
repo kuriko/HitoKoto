@@ -2,14 +2,14 @@
 色々な物事を「一言」で表現してみるソーシャルサービスです。
 
 このアプリケーションはN予備校プログラミングコース冬のWebアプリコンテストのサンプル作品です。
-[N予備校プログラミングコース](https://www.nnn.ed.nico/pages/programming/)  
-[N予備校プログラミングコンテスト](https://progedu.github.io/webappcontest/)
+- [N予備校プログラミングコース](https://www.nnn.ed.nico/pages/programming/)
+- [N予備校プログラミングコンテスト](https://progedu.github.io/webappcontest/)
 
 # ライセンス
 本ソフトウェアは、[MITライセンス](https://github.com/tokyo-metropolitan-gov/covid19/blob/development/LICENSE.txt)の元提供されています。
 
 # アプリの準備
-N予備校2021年度プログラミング入門コースで学ぶDocker環境の利用が前提となっています。
+[N予備校2021年度版プログラミング入門コース](https://www.nnn.ed.nico/pages/programming/)で学ぶDocker環境の利用が前提となっています。
 
 ## 以下の手順でアプリケーションサーバーを立ち上げてください。
 
