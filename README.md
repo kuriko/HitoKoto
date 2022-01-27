@@ -1,4 +1,7 @@
-# このアプリケーションはN予備校プログラミングコース冬のWebアプリコンテストのサンプル作品です
+# HitoKoto について
+色々な物事を「一言」で表現してみるソーシャルサービスです。
+
+このアプリケーションはN予備校プログラミングコース冬のWebアプリコンテストのサンプル作品です。
 [N予備校プログラミングコース](https://www.nnn.ed.nico/pages/programming/)  
 [N予備校プログラミングコンテスト](https://progedu.github.io/webappcontest/)
 
