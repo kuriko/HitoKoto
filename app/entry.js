@@ -70,7 +70,7 @@ $('.deleteHitokoto').on('click', function() {
   });
 });
 
-$('.star').on('click', function() {
+$('.starButton').on('click', function() {
   const $star = $(this);
   const data = $star.data();
   $.ajax({

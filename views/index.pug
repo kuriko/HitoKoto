@@ -6,47 +6,65 @@ block content
     h1.display-4 HitoKoto
     p.lead いろんなものを一言で表してみよう！
 
-  if user
-    - var hasTheme = themes.length > 0
-    if hasTheme
-      h3.text-center.my-3 新着のテーマ
-      each theme in themes
-        div(id=`Theme_${theme.theme_id}`).card.mb-3
-          div.card-header.p-2
-            div.row
-              div.col-md-6.col-sm-6.col-xs-6
-                h5.card-title.m-2 #{theme.theme}
-              div.col-md-offset-6.col-md-6.col-sm-6.col-xs-6.text-right
-                button(data-theme_id=theme.theme_id).showHitokotoDetail.btn.btn-info
-                  i.far.fa-comment-dots
-                if user.username === theme.user.username || user.username === 'kuriko'
-                  button(data-theme_id=theme.theme_id data-csrf=csrfToken).deleteTheme.btn.btn-secondary.ml-2
-                    i.fas.fa-trash-alt
+  - var hasTheme = themes.length > 0
+  if hasTheme
 
-          ul(id=`HitokotoList_${theme.theme_id}` style="display: none;").list-group.list-group-flush
-            each hitokoto in hitokotos
-              if(hitokoto.theme_id === theme.theme_id)
-                li(id=`Hitokoto_${hitokoto.hitokoto_id}`).list-group-item
-                  div.container.pr-0
-                    div.row
-                      div.col-md-8.col-sm-8.col-xs-8
-                        div.row
-                          a(href="#")
-                            img(src=`https://avatars.githubusercontent.com/${hitokoto.user.username}`).hitokotoIcon
-                          span.ml-2 #{hitokoto.hitokoto}
-                      div.col-md-offset-4.col-md-4.col-sm-4.col-xs-4.text-right
-                        | by #{hitokoto.user.username}
-                        button(
-                          data-theme_id=theme.theme_id 
-                          data-hitokoto_id=hitokoto.hitokoto_id 
-                          data-stared=`${hitokoto.star ? hitokoto.star.stared : 0}` 
-                          data-csrf=csrfToken
-                          class=`${(hitokoto.star && hitokoto.star.stared) ? 'btn-outline-primary' : 'btn-outline-secondary'}`
-                        ).star.btn.btn-sm.ml-2.border-0
-                          i(id=`Stars_${hitokoto.hitokoto_id}`).fas.fa-star  #{hitokoto.star_count}
-                        if user.username === hitokoto.user.username || user.username === 'kuriko'
-                          button(data-hitokoto_id=hitokoto.hitokoto_id data-csrf=csrfToken).deleteHitokoto.btn.btn-sm.btn-outline-secondary.ml-2.border-0
-                            i.fas.fa-trash-alt
+    //- テーマ
+    h3.text-center.my-3 新着のテーマ
+    each theme in themes
+      div(id=`Theme_${theme.theme_id}`).card.mb-3
+        div.card-header.p-2
+          div.row
+            div.col-md-6.col-sm-6.col-xs-6
+              //- Theme
+              h5.card-title.m-2 #{theme.theme}
+
+            div.col-md-offset-6.col-md-6.col-sm-6.col-xs-6.text-right
+              //- Open
+              button(data-theme_id=theme.theme_id).showHitokotoDetail.btn.btn-info
+                i.far.fa-comment-dots
+              //- Delete
+              if user && (user.username === theme.user.username || user.username === 'kuriko')
+                button(data-theme_id=theme.theme_id data-csrf=csrfToken).deleteTheme.btn.btn-secondary.ml-2
+                  i.fas.fa-trash-alt
+
+        //- HitoKoto
+        ul(id=`HitokotoList_${theme.theme_id}` style="display: none;").list-group.list-group-flush
+          each hitokoto in hitokotos
+            if(hitokoto.theme_id === theme.theme_id)
+              li(id=`Hitokoto_${hitokoto.hitokoto_id}`).list-group-item
+                div.container.pr-0
+                  div.row
+                    div.col-md-8.col-sm-8.col-xs-8
+                      div.row
+                        //- Avatar Icon
+                        a(href=`https://github.com/${hitokoto.user.username}`)
+                          img(src=`https://avatars.githubusercontent.com/${hitokoto.user.username}`).hitokotoIcon
+                        //- Hitokoto
+                        span.ml-2 #{hitokoto.hitokoto}
+
+                    div.col-md-offset-4.col-md-4.col-sm-4.col-xs-4.text-right
+                      //- Name
+                      | by #{hitokoto.user.username}
+                      //- Star
+                      - let classess = [];
+                      - classess.push((hitokoto.star && hitokoto.star.stared) ? 'btn-outline-primary' : 'btn-outline-secondary');
+                      - classess.push(user ? 'starButton' : '');
+                      button(
+                        data-theme_id=theme.theme_id 
+                        data-hitokoto_id=hitokoto.hitokoto_id 
+                        data-stared=`${hitokoto.star ? hitokoto.star.stared : 0}` 
+                        data-csrf=csrfToken
+                        class=classess.join(' ')
+                      ).btn.btn-sm.ml-2.border-0
+                        i(id=`Stars_${hitokoto.hitokoto_id}`).fas.fa-star  #{hitokoto.star_count}
+                      //- Delete
+                      if user && (user.username === hitokoto.user.username || user.username === 'kuriko')
+                        button(data-hitokoto_id=hitokoto.hitokoto_id data-csrf=csrfToken).deleteHitokoto.btn.btn-sm.btn-outline-secondary.ml-2.border-0
+                          i.fas.fa-trash-alt
+
+          //- 新規HitoKoto用テンプレート
+          if user 
             li(id="Hitokoto_template" style="display: none;").list-group-item
               div.container.pr-0
                 div.row
@@ -61,13 +79,17 @@ block content
                       i.fas.fa-star  0
                     button(data-theme_id="" data-hitokoto_id="" data-csrf=csrfToken).deleteHitokoto.btn.btn-sm.btn-outline-secondary.ml-2.border-0
                       i.fas.fa-trash-alt
+
+        //- 新規HitoKotoフォーム
+        if user 
           div(id=`HitokotoForm_${theme.theme_id}` style="display: none;").card-body.p-2
             div.input-group
               input(id=`HitokotoInput_${theme.theme_id}` type="text" placeholder=`${theme.theme} を一言で表すと……`).form-control
               div.input-group-append
                 button(data-theme_id=theme.theme_id data-csrf=csrfToken).createHitokoto.btn.btn-info 投稿
-                
 
+  //- 新規テーマフォーム   
+  if user 
     div.pb-3
       div.text-center
         button#themeInputSwitch.btn.btn-outline-info 新しくテーマをつくる
