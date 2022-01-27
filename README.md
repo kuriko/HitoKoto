@@ -8,10 +8,11 @@
 # ライセンス
 本ソフトウェアは、[MITライセンス](https://github.com/tokyo-metropolitan-gov/covid19/blob/development/LICENSE.txt)の元提供されています。
 
-# アプリの準備
+# アプリ開発について
 [N予備校2021年度版プログラミング入門コース](https://www.nnn.ed.nico/pages/programming/)で学ぶDocker環境の利用が前提となっています。
 
-## 以下の手順でアプリケーションサーバーを立ち上げてください。
+## 環境構築
+以下の手順でアプリケーションサーバーを立ち上げてください。
 
 1. このリポジトリを git clone する
 1. GitHub の OAuth アプリ登録をする
@@ -24,7 +25,7 @@
   1. npx webpack
   1. PORT=8000 GITHUB_CLIENT_ID=xxx GITHUB_CLIENT_SECRET=yyy yarn start
 
-## サーバーが立ち上がったら、以下のURLにアクセスします。  
+## サーバーが立ち上がったら、以下のURLにアクセスします。
 http://localhost:8000
 
 ## 利用規約およびプライバシーポリシー
