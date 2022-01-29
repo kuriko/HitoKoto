@@ -14,17 +14,18 @@ var User = require('./models/User');
 var Theme = require('./models/Theme');
 var Hitokoto = require('./models/Hitokoto');
 var Star = require('./models/Star');
-(async () => {
-  await User.sync();
-  Theme.belongsTo(User, { foreignKey: 'user_id' });
-  await Theme.sync();
-  Hitokoto.belongsTo(User, { foreignKey: 'user_id' });
-  Hitokoto.belongsTo(Theme, { foreignKey: 'theme_id' });
-  Hitokoto.belongsTo(Star, { foreignKey: 'hitokoto_id' });
-  await Hitokoto.sync();
-  Star.belongsTo(Hitokoto, { foreignKey: 'hitokoto_id' });
+Theme.belongsTo(User, { foreignKey: 'user_id' });
+Hitokoto.belongsTo(User, { foreignKey: 'user_id' });
+Hitokoto.belongsTo(Theme, { foreignKey: 'theme_id' });
+Hitokoto.belongsTo(Star, { foreignKey: 'hitokoto_id' });
+Star.belongsTo(Hitokoto, { foreignKey: 'hitokoto_id' });
+User.sync().then(() => {
+  return Theme.sync();
+}).then(() => {
+  return Hitokoto.sync();
+}).then(() => {
   Star.sync();
-})();
+});
 
 // Auth and Session Settings
 var GitHubStrategy = require('passport-github2').Strategy;

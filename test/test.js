@@ -1,19 +1,29 @@
 'use strict';
 const request = require('supertest');
-const assert = require('assert');
+process.env.GITHUB_CLIENT_ID = 'dummy';
+process.env.GITHUB_CLIENT_SECRET = 'dummy';
 const app = require('../app');
 const passportStub = require('passport-stub');
-const User = require('../models/user');
-const Schedule = require('../models/schedule');
-const Candidate = require('../models/candidate');
-const Availability = require('../models/availability');
-const Comment = require('../models/comment');
-const deleteScheduleAggregate = require('../routes/schedules').deleteScheduleAggregate;
+const User = require('../models/User');
 
-describe('/login', () => {
+describe('共通表示', () => {
+
+  test('非ログイン時、ログインボタンが表示される', () => {
+    return request(app)
+      .get('/')
+      .expect(/<a class="btn btn-info" href="\/auth\/github"/)
+      .expect(200);
+  });
+
+  test('フッターが表示される', () => {
+  });
+});
+
+describe('login', () => {
+
   beforeAll(() => {
     passportStub.install(app);
-    passportStub.login({ username: 'testuser' });
+    passportStub.login({ user_id: 0, username: 'testuser' });
   });
 
   afterAll(() => {
@@ -21,30 +31,120 @@ describe('/login', () => {
     passportStub.uninstall(app);
   });
 
-  test('ログインのためのリンクが含まれる', () => {
-    return request(app)
-      .get('/login')
-      .expect('Content-Type', 'text/html; charset=utf-8')
-      .expect(/<a class="btn btn-info my-3" href="\/auth\/github"/)
-      .expect(200);
+  test('ログイン後、ユーザー名が表示される', () => {
+    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
+      request(app)
+        .get('/')
+        .expect(/testuser/)
+        .expect(200);
+    });
   });
 
-  test('ログイン時はユーザー名が表示される', () => {
-    return request(app)
-      .get('/login')
-      .expect(/testuser/)
-      .expect(200);
+  test('ログイン後、ログアウトができる', () => {
+    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
+      request(app)
+        .get('/logout')
+        .expect('Location', '/')
+        .expect(302);
+    });
   });
 });
 
-describe('/logout', () => {
-  test('/ にリダイレクトされる', () => {
+describe('テーマ：非ログイン時', () => {
+
+  test('テーマ一覧が新着順で表示される', () => {
     return request(app)
-      .get('/logout')
-      .expect('Location', '/')
-      .expect(302);
+      .get('/')
+      .expect(/<a class="btn btn-info" href="\/auth\/github"/)
+      .expect(200);
+  });
+
+  test('テーマを作るボタンが表示されない', () => {
+  });
+
+  test('テーマが投稿できない', () => {
+  });
+
+  test('テーマが削除できない', () => {
   });
 });
+
+describe('テーマ：ログイン時', () => {
+  test('ログインしている場合、テーマ投稿フォームが表示される', () => {
+  });
+
+  test('ログインしている場合、テーマが投稿できる', () => {
+  });
+
+  test('テーマ投稿後、/にリダイレクトされる', () => {
+  });
+  
+  test('自分がオーナーのテーマが削除できる', () => {
+  });
+  
+  test('自分がオーナーでないテーマは削除できない', () => {
+  });
+});
+
+/**
+describe('HitoKoto', () => {
+  
+  test('HitoKotoが新着順で表示される', () => {
+  });
+
+  test('ログインしていない場合、HitoKoto投稿フォームが非表示になる', () => {
+  });
+
+  test('ログインしている場合、HitoKoto投稿フォームが表示される', () => {
+  });
+  
+  test('ログインしていない場合、HitoKotoが投稿できない', () => {
+  });
+
+  test('ログインしている場合、HitoKotoが投稿できる', () => {
+  });
+  
+  test('HitoKotoが投稿後、非同期で投稿したHitoKotoが表示される', () => {
+  });
+
+  test('HitoKoto投稿後にフォームの内容がクリアされる', () => {
+  });
+
+  test('自分がオーナーであるHitoKotoが削除できる', () => {
+  });
+
+  test('自分がオーナーでないHitoKotoは削除できない', () => {
+  });
+  
+  test('HitoKoto投稿後に非同期で追加されたHitoKotoが削除できる', () => {
+  });
+});
+
+describe('いいね', () => {
+
+  test('非同期でHitoKotoにいいねができる', () => {
+  });
+  
+  test('いいね済みのStarのテキストカラーが青色になる', () => {
+  });
+  
+  test('HitoKoto投稿後に非同期で追加されたHitoKotoにいいねができる', () => {
+  });
+  
+  test('いいねを取り消すことができる', () => {
+  });
+
+  test('いいねをした直後のHitoKotoのいいねを取り消すことができる', () => {
+  });
+  
+  test('いいねを取り消したStarのテキストカラーは灰色となる', () => {
+  });
+  
+  test('HitoKotoにいいねが押せない', () => {
+  });
+
+});
+
 
 describe('/schedules', () => {
   beforeAll(() => {
@@ -297,3 +397,4 @@ describe('/schedules/:scheduleId?delete=1', () => {
     });
   });
 });
+ */
