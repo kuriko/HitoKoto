@@ -6,6 +6,7 @@
     "start": "npx webpack --mode production && node ./bin/www",
     "test": "npx jest --testTimeout=10000 --forceExit"
   },
+  "test:unit": "jest --maxWorkers=1",
   "dependencies": {
     "bootstrap": "4.0.0",
     "cookie-parser": "~1.4.3",
@@ -39,5 +40,5 @@
   },
   "engines": {
     "node": ">=14"
-   }
+  }
 }

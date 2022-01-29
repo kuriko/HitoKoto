@@ -5,6 +5,7 @@ process.env.GITHUB_CLIENT_SECRET = 'dummy';
 const app = require('../app');
 const passportStub = require('passport-stub');
 const User = require('../models/User');
+const Theme = require('../models/Theme');
 
 describe('共通表示', () => {
 
@@ -23,12 +24,7 @@ describe('login', () => {
 
   beforeAll(() => {
     passportStub.install(app);
-    passportStub.login({ user_id: 0, username: 'testuser' });
-  });
-
-  afterAll(() => {
-    passportStub.logout();
-    passportStub.uninstall(app);
+    passportStub.login({ id: 0, username: 'testuser' });
   });
 
   test('ログイン後、ユーザー名が表示される', () => {
@@ -48,41 +44,161 @@ describe('login', () => {
         .expect(302);
     });
   });
+
+  afterAll(() => {
+    passportStub.logout();
+    passportStub.uninstall(app);
+  });
 });
 
 describe('テーマ：非ログイン時', () => {
 
   test('テーマ一覧が新着順で表示される', () => {
-    return request(app)
-      .get('/')
-      .expect(/<a class="btn btn-info" href="\/auth\/github"/)
-      .expect(200);
+    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
+      Theme.upsert({ theme: 'TestTheme', user_id: 0, }).then(() => {
+        request(app)
+          .get('/')
+          .expect(/<h5 class="card-title m-2">TestTheme/)
+          .expect(200);
+      });
+    });
   });
 
   test('テーマを作るボタンが表示されない', () => {
+    return request(app)
+      .get('/')
+      .expect(/^(?!.*themeInputSwitch).*$/)
+      .expect(200);
   });
 
-  test('テーマが投稿できない', () => {
+  test('テーマが投稿できない', (done) => {
+    return request(app)
+      .post('/theme')
+      .send({ theme: 'TestTheme_テーマが投稿できない' })
+      .expect('Location', '/auth/github')
+      .expect(302)
+      .end((err, res) => {
+        request(app)
+          .post('/')
+          .expect(/^(?!.*TestTheme_テーマが投稿できない).*$/)
+          .expect(200)
+          .end(() => {
+            done();
+          });
+      });
   });
 
-  test('テーマが削除できない', () => {
+  test('テーマが削除できない', (done) => {
+    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
+      Theme.upsert({ theme: 'TestTheme_テーマが削除できない', user_id: 0, }).then(() => {
+        request(app)
+          .delete('/theme/1')
+          .expect('Location', '/auth/github')
+          .expect(302)
+          .end((err, res) => {
+            request(app)
+              .post('/')
+              .expect(/TestTheme_テーマが削除できない/)
+              .expect(200)
+              .end((err, res) => {
+                Theme.destroy({ where : { theme: "TestTheme_テーマが削除できない" }}).then(() => {
+                  done();
+                });
+              });
+          });
+      });
+    });
   });
 });
 
 describe('テーマ：ログイン時', () => {
-  test('ログインしている場合、テーマ投稿フォームが表示される', () => {
+
+  beforeAll(() => {
+    passportStub.install(app);
+    passportStub.login({ id: 0, username: 'testuser' });
   });
 
-  test('ログインしている場合、テーマが投稿できる', () => {
+  test('テーマ投稿フォームが表示される', () => {
+    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
+      return request(app)
+        .get('/')
+        .expect(/themeInputSwitch/)
+        .expect(200);
+    });
   });
 
-  test('テーマ投稿後、/にリダイレクトされる', () => {
+  test('テーマが投稿できる', (done) => {
+    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
+      request(app)
+        .post('/theme')
+        .send({ theme: 'TestTheme_テーマが投稿できる' })
+        .expect('Location', '/')
+        .expect(302)
+        .end((err, res) => {
+          request(app)
+            .post('/')
+            .expect(/TestTheme_テーマが投稿できる/)
+            .expect(200)
+            .end((err, res) => {
+              Theme.destroy({ where : { theme: "TestTheme_テーマが投稿できる" }}).then(() => {
+                done();
+              });
+            });
+        });
+    });
   });
   
-  test('自分がオーナーのテーマが削除できる', () => {
+  test('自分がオーナーのテーマが削除できる', (done) => {
+    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
+      Theme.upsert({ theme: 'TestTheme_自分がオーナーのテーマが削除できる', user_id: 0 }).then(() => {
+        Theme.findOne({ where: { theme: 'TestTheme_自分がオーナーのテーマが削除できる' }}).then((theme) => {
+          request(app)
+            .delete('/theme/' + theme.theme_id)
+            .expect('Location', '/')
+            .expect(302)
+            .end((err, res) => {
+              request(app)
+                .post('/')
+                .expect(/^(?!.*TestTheme_自分がオーナーのテーマが削除できる).*$/)
+                .expect(200)
+                .end((err, res) => {
+                  Theme.destroy({ where : { theme: "TestTheme_自分がオーナーのテーマが削除できる" }}).then(() => {
+                    done();
+                  });
+                });
+            });
+          });
+        });
+    });
   });
   
   test('自分がオーナーでないテーマは削除できない', () => {
+    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
+      Theme.upsert({ theme: 'TestTheme_自分がオーナーでないテーマは削除できない', user_id: 1 }).then(() => {
+        Theme.findOne({ where: { theme: '自分がオーナーでないテーマは削除できない' }}).then((theme) => {
+          request(app)
+            .delete('/theme/' + theme.theme_id)
+            .expect('Location', '/')
+            .expect(302)
+            .end((err, res) => {
+              request(app)
+                .post('/')
+                .expect(/自分がオーナーでないテーマは削除できない/)
+                .expect(200)
+                .end((err, res) => {
+                  Theme.destroy({ where : { theme: "TestTheme_自分がオーナーでないテーマは削除できない" }}).then(() => {
+                    done();
+                  });
+                });
+            });
+          });
+        });
+    });
+  });
+  
+  afterAll(() => {
+    passportStub.logout();
+    passportStub.uninstall(app);
   });
 });
 
