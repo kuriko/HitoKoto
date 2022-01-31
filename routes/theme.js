@@ -62,7 +62,7 @@ router.post('/:theme_id/hitokoto', authenticationEnsurer, csrfProtection, (req, 
 router.delete('/:theme_id', authenticationEnsurer, csrfProtection, (req, res, next) => {
   Theme.update(
     { state: 1 },
-    { where: { theme_id: req.params.id, user_id: req.user.id}}
+    { where: { theme_id: req.params.theme_id, user_id: req.user.id}}
   ).then((theme) => {
     res.json(['success']);
   });

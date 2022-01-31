@@ -21,7 +21,7 @@ function createProd() {
 function createDev() {
   return new Sequelize(
     'postgres://postgres:postgres@db/hitokoto',
-    { logging: true }
+    { logging: false }
   );
 }
 

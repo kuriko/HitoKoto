@@ -2,21 +2,27 @@
 const request = require('supertest');
 process.env.GITHUB_CLIENT_ID = 'dummy';
 process.env.GITHUB_CLIENT_SECRET = 'dummy';
+const $ = require('jquery');
 const app = require('../app');
 const passportStub = require('passport-stub');
 const User = require('../models/User');
 const Theme = require('../models/Theme');
+const Hitokoto = require('../models/Hitokoto');
+
+// csrfトークンの取得（ログインが必要）
+const getCsrfToken = html => $(html).find('input[name=_csrf]').val();
 
 describe('共通表示', () => {
 
-  test('非ログイン時、ログインボタンが表示される', () => {
-    return request(app)
-      .get('/')
-      .expect(/<a class="btn btn-info" href="\/auth\/github"/)
-      .expect(200);
+  test('非ログイン時、ログインボタンが表示される', async () => {
+    const res = await request(app).get('/');
+    expect(res.status).toBe(200);
+    expect(res.text).toMatch(/<a class="btn btn-info" href="\/auth\/github"/);
   });
 
-  test('フッターが表示される', () => {
+  test('フッターが表示される', async () => {
+    const res = await request(app).get('/');
+    expect(res.text).toMatch(/footer/);
   });
 });
 
@@ -27,22 +33,17 @@ describe('login', () => {
     passportStub.login({ id: 0, username: 'testuser' });
   });
 
-  test('ログイン後、ユーザー名が表示される', () => {
-    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
-      request(app)
-        .get('/')
-        .expect(/testuser/)
-        .expect(200);
-    });
+  test('ログイン後、ユーザー名が表示される', async () => {
+    await User.upsert({ user_id: 0, username: 'testuser' });
+    const res = await request(app).get('/');
+    expect(res.text).toMatch(/testuser/);
   });
 
-  test('ログイン後、ログアウトができる', () => {
-    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
-      request(app)
-        .get('/logout')
-        .expect('Location', '/')
-        .expect(302);
-    });
+  test('ログイン後、ログアウトができる', async () => {
+    await User.upsert({ user_id: 0, username: 'testuser' });
+    const res = await request(app).get('/logout');
+    expect(res.status).toBe(302);
+    expect(res.header['location']).toBe('/');
   });
 
   afterAll(() => {
@@ -53,61 +54,55 @@ describe('login', () => {
 
 describe('テーマ：非ログイン時', () => {
 
-  test('テーマ一覧が新着順で表示される', () => {
-    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
-      Theme.upsert({ theme: 'TestTheme', user_id: 0, }).then(() => {
-        request(app)
-          .get('/')
-          .expect(/<h5 class="card-title m-2">TestTheme/)
-          .expect(200);
-      });
-    });
+  test('テーマ一覧が新着順で表示される', async () => {
+    await User.upsert({ user_id: 0, username: 'testuser' });
+    await Theme.upsert({ theme: 'TestTheme_テーマ一覧が新着順で表示される1', user_id: 0, });
+    await Theme.upsert({ theme: 'TestTheme_テーマ一覧が新着順で表示される2', user_id: 0, });
+    
+    // テーマ一覧が新着順で表示される
+    const res = await request(app).get('/');
+    expect(res.text).toMatch(/TestTheme_テーマ一覧が新着順で表示される/);
+    const firstPostIndex = res.text.indexOf('TestTheme_テーマ一覧が新着順で表示される1');
+    const secondPostIndex = res.text.indexOf('TestTheme_テーマ一覧が新着順で表示される2');
+    expect(secondPostIndex).toBeLessThan(firstPostIndex);
+
+    Theme.destroy({ where : { theme: "TestTheme_テーマ一覧が新着順で表示される" }});
   });
 
-  test('テーマを作るボタンが表示されない', () => {
-    return request(app)
-      .get('/')
-      .expect(/^(?!.*themeInputSwitch).*$/)
-      .expect(200);
+  test('テーマを作るボタンが表示されない', async () => {
+    const res = await request(app).get('/');
+    expect(res.text).not.toMatch(/themeInputSwitch/);
   });
 
-  test('テーマが投稿できない', (done) => {
-    return request(app)
+  test('テーマが投稿できない', async () => {
+
+    // POSTリクエスト（CSRFで弾かれる）
+    const resPostTheme = await request(app)
       .post('/theme')
-      .send({ theme: 'TestTheme_テーマが投稿できない' })
-      .expect('Location', '/auth/github')
-      .expect(302)
-      .end((err, res) => {
-        request(app)
-          .post('/')
-          .expect(/^(?!.*TestTheme_テーマが投稿できない).*$/)
-          .expect(200)
-          .end(() => {
-            done();
-          });
-      });
+      .send({ theme: 'TestTheme_テーマが投稿できない' });
+    expect(resPostTheme.status).toBe(302);
+    expect(resPostTheme.header['location']).toBe('/auth/github');
+    
+    // 投稿されていない
+    const resRoot = await request(app).get('/');
+    expect(resRoot.text).not.toMatch(/TestTheme_テーマが投稿できない/);
   });
 
-  test('テーマが削除できない', (done) => {
-    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
-      Theme.upsert({ theme: 'TestTheme_テーマが削除できない', user_id: 0, }).then(() => {
-        request(app)
-          .delete('/theme/1')
-          .expect('Location', '/auth/github')
-          .expect(302)
-          .end((err, res) => {
-            request(app)
-              .post('/')
-              .expect(/TestTheme_テーマが削除できない/)
-              .expect(200)
-              .end((err, res) => {
-                Theme.destroy({ where : { theme: "TestTheme_テーマが削除できない" }}).then(() => {
-                  done();
-                });
-              });
-          });
-      });
-    });
+  test('テーマが削除できない', async () => {
+    await User.upsert({ user_id: 0, username: 'testuser' })
+    const theme = await Theme.create({ theme: 'TestTheme_テーマが削除できない', user_id: 0, });
+
+    // 削除リクエスト（CSRFで弾かれる）
+    const resDeleteTheme = await request(app)
+      .delete('/theme/' + theme.theme_id);
+    expect(resDeleteTheme.status).toBe(302);
+    expect(resDeleteTheme.header['location']).toBe('/auth/github');
+    
+    // 削除されていない
+    const resRoot = await request(app).get('/');
+    expect(resRoot.text).toMatch(/TestTheme_テーマが削除できない/);
+    
+    await Theme.destroy({ where : { theme: "TestTheme_テーマが削除できない" }});
   });
 });
 
@@ -118,82 +113,68 @@ describe('テーマ：ログイン時', () => {
     passportStub.login({ id: 0, username: 'testuser' });
   });
 
-  test('テーマ投稿フォームが表示される', () => {
-    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
-      return request(app)
-        .get('/')
-        .expect(/themeInputSwitch/)
-        .expect(200);
-    });
+  test('テーマ投稿フォームが表示される', async () => {
+    await User.upsert({ user_id: 0, username: 'testuser' });
+    const res = await request(app).get('/');
+    expect(res.text).toMatch(/themeInputSwitch/);
   });
 
-  test('テーマが投稿できる', (done) => {
-    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
-      request(app)
-        .post('/theme')
-        .send({ theme: 'TestTheme_テーマが投稿できる' })
-        .expect('Location', '/')
-        .expect(302)
-        .end((err, res) => {
-          request(app)
-            .post('/')
-            .expect(/TestTheme_テーマが投稿できる/)
-            .expect(200)
-            .end((err, res) => {
-              Theme.destroy({ where : { theme: "TestTheme_テーマが投稿できる" }}).then(() => {
-                done();
-              });
-            });
-        });
-    });
+  test('テーマが投稿できる', async () => {
+    await User.upsert({ user_id: 0, username: 'testuser' });
+    const resCsrfSrc = await request(app).get('/');
+
+    // POSTリクエスト
+    const resPostTheme = await request(app)
+      .post('/theme')
+      .set('cookie', resCsrfSrc.headers['set-cookie'])
+      .send({ theme: 'TestTheme_テーマが投稿できる', _csrf: getCsrfToken(resCsrfSrc.text) });
+    expect(resPostTheme.status).toBe(302);
+    expect(resPostTheme.header["location"]).toBe('/');
+
+    // 投稿されたテーマを確認
+    const resRoot = await request(app).get('/');
+    expect(resRoot.text).toMatch(/TestTheme_テーマが投稿できる/);
+
+    await Theme.destroy({ where : { theme: "TestTheme_テーマが投稿できる" }});
   });
   
-  test('自分がオーナーのテーマが削除できる', (done) => {
-    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
-      Theme.upsert({ theme: 'TestTheme_自分がオーナーのテーマが削除できる', user_id: 0 }).then(() => {
-        Theme.findOne({ where: { theme: 'TestTheme_自分がオーナーのテーマが削除できる' }}).then((theme) => {
-          request(app)
-            .delete('/theme/' + theme.theme_id)
-            .expect('Location', '/')
-            .expect(302)
-            .end((err, res) => {
-              request(app)
-                .post('/')
-                .expect(/^(?!.*TestTheme_自分がオーナーのテーマが削除できる).*$/)
-                .expect(200)
-                .end((err, res) => {
-                  Theme.destroy({ where : { theme: "TestTheme_自分がオーナーのテーマが削除できる" }}).then(() => {
-                    done();
-                  });
-                });
-            });
-          });
-        });
-    });
+  test('自分がオーナーのテーマが削除できる', async () => {
+    await User.upsert({ user_id: 0, username: 'testuser' });
+    const theme = await Theme.create({ theme: 'TestTheme_自分がオーナーのテーマが削除できる', user_id: 0 });
+    const resCsrfSrc = await request(app).get('/');
+    
+    // 削除リクエスト
+    const resDeleteTheme = await request(app)
+      .delete('/theme/' + theme.theme_id)
+      .set('cookie', resCsrfSrc.headers['set-cookie'])
+      .send({ _csrf: getCsrfToken(resCsrfSrc.text) })
+    expect(resDeleteTheme.text).toBe('["success"]');
+    
+    // データが消えている
+    const resRoot = await request(app).get('/');
+    expect(resRoot.text).not.toMatch(/TestTheme_自分がオーナーのテーマが削除できる/);
+
+    await Theme.destroy({ where : { theme: "TestTheme_自分がオーナーのテーマが削除できる" }});
   });
   
-  test('自分がオーナーでないテーマは削除できない', () => {
-    return User.upsert({ user_id: 0, username: 'testuser' }).then(() => {
-      Theme.upsert({ theme: 'TestTheme_自分がオーナーでないテーマは削除できない', user_id: 1 }).then(() => {
-        Theme.findOne({ where: { theme: '自分がオーナーでないテーマは削除できない' }}).then((theme) => {
-          request(app)
-            .delete('/theme/' + theme.theme_id)
-            .expect('Location', '/')
-            .expect(302)
-            .end((err, res) => {
-              request(app)
-                .post('/')
-                .expect(/自分がオーナーでないテーマは削除できない/)
-                .expect(200)
-                .end((err, res) => {
-                  Theme.destroy({ where : { theme: "TestTheme_自分がオーナーでないテーマは削除できない" }}).then(() => {
-                    done();
-                  });
-                });
-            });
-          });
-        });
-    });
+  test('自分がオーナーでないテーマは削除できない', async () => {
+      await User.upsert({ user_id: 0, username: 'testuser' });
+      await User.upsert({ user_id: 1, username: 'testuser' });
+      const theme = await Theme.create({ theme: 'TestTheme_自分がオーナーでないテーマは削除できない', user_id: 1 });
+      const resCsrfSrc = await request(app).get('/');
+      
+      // 削除リクエスト（０件で更新するので成功扱い）
+      const resDeleteTheme = await request(app)
+        .delete('/theme/' + theme.theme_id)
+        .set('cookie', resCsrfSrc.headers['set-cookie'])
+        .send({ _csrf: getCsrfToken(resCsrfSrc.text) });
+      expect(resDeleteTheme.text).toBe('["success"]');
+
+      // データが消えていない
+      const resRoot = await request(app).get('/');
+      expect(resRoot.text).toMatch(/自分がオーナーでないテーマは削除できない/);
+      
+      await Theme.destroy({ where : { theme: "TestTheme_自分がオーナーでないテーマは削除できない" }});
   });
   
   afterAll(() => {
@@ -202,22 +183,40 @@ describe('テーマ：ログイン時', () => {
   });
 });
 
-/**
-describe('HitoKoto', () => {
+describe('HitoKoto：非ログイン時', () => {
   
-  test('HitoKotoが新着順で表示される', () => {
+  test('HitoKotoが新着順で表示される', async () => {
+    await User.upsert({ user_id: 0, username: 'testuser' });
+    const theme = await Theme.create({ theme: 'TestTheme_HitoKotoが新着順で表示される', user_id: 0, });
+    await Hitokoto.upsert({ hitokoto: 'TestHitokoto_HitoKotoが新着順で表示される1', theme_id: theme.theme_id, user_id: 0, });
+    await Hitokoto.upsert({ hitokoto: 'TestHitokoto_HitoKotoが新着順で表示される2', theme_id: theme.theme_id, user_id: 0, });
+
+    // HitoKotoが新着順で表示される
+    const res = await request(app).get('/');
+    expect(res.text).toMatch(/TestHitokoto/);
+    const firstPostIndex = res.text.indexOf('TestHitokoto_HitoKotoが新着順で表示される1');
+    const secondPostIndex = res.text.indexOf('TestHitokoto_HitoKotoが新着順で表示される2');
+    expect(secondPostIndex).toBeLessThan(firstPostIndex);
+
+    await Hitokoto.destroy({ where : { hitokoto: "TestHitokoto_HitoKotoが新着順で表示される1" }});
+    await Hitokoto.destroy({ where : { hitokoto: "TestHitokoto_HitoKotoが新着順で表示される2" }});
+    await Theme.destroy({ where : { theme: "TestTheme_HitoKotoが新着順で表示される" }});
   });
 
-  test('ログインしていない場合、HitoKoto投稿フォームが非表示になる', () => {
-  });
-
-  test('ログインしている場合、HitoKoto投稿フォームが表示される', () => {
+  test('HitoKoto投稿フォームが非表示になる', () => {
+    
   });
   
-  test('ログインしていない場合、HitoKotoが投稿できない', () => {
+  test('HitoKotoが投稿できない', () => {
+  });
+});
+
+describe('HitoKoto：ログイン時', () => {
+
+  test('HitoKoto投稿フォームが表示される', () => {
   });
 
-  test('ログインしている場合、HitoKotoが投稿できる', () => {
+  test('HitoKotoが投稿できる', () => {
   });
   
   test('HitoKotoが投稿後、非同期で投稿したHitoKotoが表示される', () => {
@@ -260,257 +259,3 @@ describe('いいね', () => {
   });
 
 });
-
-
-describe('/schedules', () => {
-  beforeAll(() => {
-    passportStub.install(app);
-    passportStub.login({ id: 0, username: 'testuser' });
-  });
-
-  afterAll(() => {
-    passportStub.logout();
-    passportStub.uninstall(app);
-  });
-
-  test('予定が作成でき、表示される', (done) => {
-    User.upsert({ userId: 0, username: 'testuser' }).then(() => {
-      request(app)
-        .post('/schedules')
-        .send({ scheduleName: 'テスト予定1', memo: 'テストメモ1\r\nテストメモ2', candidates: 'テスト候補1\r\nテスト候補2\r\nテスト候補3' })
-        .expect('Location', /schedules/)
-        .expect(302)
-        .end((err, res) => {
-          const createdSchedulePath = res.headers.location;
-          request(app)
-            .get(createdSchedulePath)
-            .expect(/テスト予定1/)
-            .expect(/テストメモ1/)
-            .expect(/テストメモ2/)
-            .expect(/テスト候補1/)
-            .expect(/テスト候補2/)
-            .expect(/テスト候補3/)
-            .expect(200)
-            .end((err, res) => { deleteScheduleAggregate(createdSchedulePath.split('/schedules/')[1], done, err); });
-        });
-    });
-  });
-});
-
-describe('/schedules/:scheduleId/users/:userId/candidates/:candidateId', () => {
-  beforeAll(() => {
-    passportStub.install(app);
-    passportStub.login({ id: 0, username: 'testuser' });
-  });
-
-  afterAll(() => {
-    passportStub.logout();
-    passportStub.uninstall(app);
-  });
-
-  test('出欠が更新できる', (done) => {
-    User.upsert({ userId: 0, username: 'testuser' }).then(() => {
-      request(app)
-        .post('/schedules')
-        .send({ scheduleName: 'テスト出欠更新予定1', memo: 'テスト出欠更新メモ1', candidates: 'テスト出欠更新候補1' })
-        .end((err, res) => {
-          const createdSchedulePath = res.headers.location;
-          const scheduleId = createdSchedulePath.split('/schedules/')[1];
-          Candidate.findOne({
-            where: { scheduleId: scheduleId }
-          }).then((candidate) => {
-            // 更新がされることをテスト
-            const userId = 0;
-            request(app)
-              .post(`/schedules/${scheduleId}/users/${userId}/candidates/${candidate.candidateId}`)
-              .send({ availability: 2 }) // 出席に更新
-              .expect('{"status":"OK","availability":2}')
-              .end((err, res) => {
-                Availability.findAll({
-                  where: { scheduleId: scheduleId }
-                }).then((availabilities) => {
-                  assert.strictEqual(availabilities.length, 1);
-                  assert.strictEqual(availabilities[0].availability, 2);
-                  deleteScheduleAggregate(scheduleId, done, err);
-                });
-              });
-          });
-        });
-    });
-  });
-});
-
-describe('/schedules/:scheduleId/users/:userId/comments', () => {
-  beforeAll(() => {
-    passportStub.install(app);
-    passportStub.login({ id: 0, username: 'testuser' });
-  });
-
-  afterAll(() => {
-    passportStub.logout();
-    passportStub.uninstall(app);
-  });
-
-  test('コメントが更新できる', (done) => {
-    User.upsert({ userId: 0, username: 'testuser' }).then(() => {
-      request(app)
-        .post('/schedules')
-        .send({ scheduleName: 'テストコメント更新予定1', memo: 'テストコメント更新メモ1', candidates: 'テストコメント更新候補1' })
-        .end((err, res) => {
-          const createdSchedulePath = res.headers.location;
-          const scheduleId = createdSchedulePath.split('/schedules/')[1];
-          // 更新がされることをテスト
-          const userId = 0;
-          request(app)
-            .post(`/schedules/${scheduleId}/users/${userId}/comments`)
-            .send({ comment: 'testcomment' })
-            .expect('{"status":"OK","comment":"testcomment"}')
-            .end((err, res) => {
-              Comment.findAll({
-                where: { scheduleId: scheduleId }
-              }).then((comments) => {
-                assert.strictEqual(comments.length, 1);
-                assert.strictEqual(comments[0].comment, 'testcomment');
-                deleteScheduleAggregate(scheduleId, done, err);
-              });
-            });
-        });
-    });
-  });
-});
-
-
-describe('/schedules/:scheduleId?edit=1', () => {
-  beforeAll(() => {
-    passportStub.install(app);
-    passportStub.login({ id: 0, username: 'testuser' });
-  });
-
-  afterAll(() => {
-    passportStub.logout();
-    passportStub.uninstall(app);
-  });
-
-  test('予定が更新でき、候補が追加できる', (done) => {
-    User.upsert({ userId: 0, username: 'testuser' }).then(() => {
-      request(app)
-        .post('/schedules')
-        .send({ scheduleName: 'テスト更新予定1', memo: 'テスト更新メモ1', candidates: 'テスト更新候補1' })
-        .end((err, res) => {
-          const createdSchedulePath = res.headers.location;
-          const scheduleId = createdSchedulePath.split('/schedules/')[1];
-          // 更新がされることをテスト
-          request(app)
-            .post(`/schedules/${scheduleId}?edit=1`)
-            .send({ scheduleName: 'テスト更新予定2', memo: 'テスト更新メモ2', candidates: 'テスト更新候補2' })
-            .end((err, res) => {
-              Schedule.findByPk(scheduleId).then((s) => {
-                assert.strictEqual(s.scheduleName, 'テスト更新予定2');
-                assert.strictEqual(s.memo, 'テスト更新メモ2');
-              });
-              Candidate.findAll({
-                where: { scheduleId: scheduleId },
-                order: [['candidateId', 'ASC']]
-              }).then((candidates) => {
-                assert.strictEqual(candidates.length, 2);
-                assert.strictEqual(candidates[0].candidateName, 'テスト更新候補1');
-                assert.strictEqual(candidates[1].candidateName, 'テスト更新候補2');
-                deleteScheduleAggregate(scheduleId, done, err);
-              });
-            });
-        });
-    });
-  });
-});
-
-describe('/schedules/:scheduleId?delete=1', () => {
-  beforeAll(() => {
-    passportStub.install(app);
-    passportStub.login({ id: 0, username: 'testuser' });
-  });
-
-  afterAll(() => {
-    passportStub.logout();
-    passportStub.uninstall(app);
-  });
-
-  test('予定に関連する全ての情報が削除できる', (done) => {
-    User.upsert({ userId: 0, username: 'testuser' }).then(() => {
-      request(app)
-        .post('/schedules')
-        .send({ scheduleName: 'テスト更新予定1', memo: 'テスト更新メモ1', candidates: 'テスト更新候補1' })
-        .end((err, res) => {
-          const createdSchedulePath = res.headers.location;
-          const scheduleId = createdSchedulePath.split('/schedules/')[1];
-
-          // 出欠作成
-          const promiseAvailability = Candidate.findOne({
-            where: { scheduleId: scheduleId }
-          }).then((candidate) => {
-            return new Promise((resolve) => {
-              const userId = 0;
-              request(app)
-                .post(`/schedules/${scheduleId}/users/${userId}/candidates/${candidate.candidateId}`)
-                .send({ availability: 2 }) // 出席に更新
-                .end((err, res) => {
-                  if (err) done(err);
-                  resolve();
-                });
-            });
-          });
-
-          // コメント作成
-          const promiseComment = new Promise((resolve) => {
-            const userId = 0;
-            request(app)
-              .post(`/schedules/${scheduleId}/users/${userId}/comments`)
-              .send({ comment: 'testcomment' })
-              .expect('{"status":"OK","comment":"testcomment"}')
-              .end((err, res) => {
-                if (err) done(err);
-                resolve();
-              });
-          });
-
-          // 削除
-          const promiseDeleted = Promise.all([promiseAvailability, promiseComment]).then(() => {
-            return new Promise((resolve) => {
-              request(app)
-                .post(`/schedules/${scheduleId}?delete=1`)
-                .end((err, res) => {
-                  if (err) done(err);
-                  resolve();
-                });
-            });
-          });
-
-          // テスト
-          promiseDeleted.then(() => {
-            const p1 = Comment.findAll({
-              where: { scheduleId: scheduleId }
-            }).then((comments) => {
-              assert.strictEqual(comments.length, 0);
-            });
-            const p2 = Availability.findAll({
-              where: { scheduleId: scheduleId }
-            }).then((availabilities) => {
-              assert.strictEqual(availabilities.length, 0);
-            });
-            const p3 = Candidate.findAll({
-              where: { scheduleId: scheduleId }
-            }).then((candidates) => {
-              assert.strictEqual(candidates.length, 0);
-            });
-            const p4 = Schedule.findByPk(scheduleId).then((schedule) => {
-              assert.strictEqual(!schedule, true);
-            });
-            Promise.all([p1, p2, p3, p4]).then(() => {
-              if (err) return done(err);
-              done();
-            });
-          });
-        });
-    });
-  });
-});
- */
