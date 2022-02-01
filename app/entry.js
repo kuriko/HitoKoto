@@ -43,6 +43,8 @@ $('.createHitokoto').on('click', function() {
       });
       $(`#HitokotoList_${hitokoto.theme.theme_id}`).prepend(hitokotoTemplate);
       hitokotoTemplate.show();
+
+      $(`#HitokotoInput_${data.theme_id}`).val("");
     }
   });
 });

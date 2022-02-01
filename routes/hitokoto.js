@@ -11,17 +11,22 @@ const csrfProtection = csrf({ cookie: true });
  * 指定のHitoKotoにいいねをつける
  */
 router.post('/:hitokoto_id/star', authenticationEnsurer, csrfProtection, (req, res, next) => {
+  const hitokoto_id = Number(req.params.hitokoto_id);
+  if (!hitokoto_id) {
+    res.json([['Bad Request']]);
+    return;
+  }
   const resJson = {};
   Star.upsert({
-    hitokoto_id: req.params.hitokoto_id,
+    hitokoto_id,
     user_id: req.user.id,
     stared: Number(req.body.stared) === 1 ? 0 : 1
   }).then((stars) => {
     resJson.stared = stars[0].stared;
-    return Star.sum('stared', { where: { hitokoto_id: req.params.hitokoto_id }});
+    return Star.sum('stared', { where: { hitokoto_id }});
   }).then((starCount) => {
     resJson.starCount = starCount;
-    return Hitokoto.update({ star_count: starCount }, { where: { hitokoto_id: req.params.hitokoto_id }});
+    return Hitokoto.update({ star_count: starCount }, { where: { hitokoto_id }});
   }).then(() => {
     res.json(resJson);
   });
@@ -31,9 +36,14 @@ router.post('/:hitokoto_id/star', authenticationEnsurer, csrfProtection, (req, r
  * 指定のHitoKotoを削除
  */
 router.delete('/:hitokoto_id', authenticationEnsurer, csrfProtection, (req, res, next) => {
+  const hitokoto_id = Number(req.params.hitokoto_id);
+  if (!hitokoto_id) {
+    res.json([['Bad Request']]);
+    return;
+  }
   Hitokoto.update(
     { state: 1 },
-    { where: { hitokoto_id: req.params.hitokoto_id, user_id: req.user.id}}
+    { where: { hitokoto_id, user_id: req.user.id}}
   ).then((hitokoto) => {
     res.json(['success']);
   });

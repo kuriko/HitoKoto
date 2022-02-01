@@ -33,6 +33,12 @@ router.post('/', authenticationEnsurer, csrfProtection, (req, res, next) => {
  */
 router.post('/:theme_id/hitokoto', authenticationEnsurer, csrfProtection, (req, res, next) => {
   
+  const theme_id = Number(req.params.theme_id);
+  if (!theme_id) {
+    res.json([['Bad Request']]);
+    return;
+  }
+
   // 内容が空の場合は処理しない
   if(!req.body.hitokoto.trim()) {
     res.redirect('/');
@@ -41,7 +47,7 @@ router.post('/:theme_id/hitokoto', authenticationEnsurer, csrfProtection, (req, 
 
   const hitokoto = {
     hitokoto: req.body.hitokoto.slice(0, 255),
-    theme_id: req.params.theme_id,
+    theme_id,
     user_id: req.user.id
   }
   Hitokoto.create(hitokoto).then((hitokoto) => {
@@ -60,9 +66,14 @@ router.post('/:theme_id/hitokoto', authenticationEnsurer, csrfProtection, (req, 
  * テーマ削除
  */
 router.delete('/:theme_id', authenticationEnsurer, csrfProtection, (req, res, next) => {
+  const theme_id = Number(req.params.theme_id);
+  if (!theme_id) {
+    res.json([['Bad Request']]);
+    return;
+  }
   Theme.update(
     { state: 1 },
-    { where: { theme_id: req.params.theme_id, user_id: req.user.id}}
+    { where: { theme_id, user_id: req.user.id}}
   ).then((theme) => {
     res.json(['success']);
   });

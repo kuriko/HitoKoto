@@ -29,7 +29,7 @@ block content
                   i.fas.fa-trash-alt
 
         //- HitoKoto
-        ul(id=`HitokotoList_${theme.theme_id}` style="display: none;").list-group.list-group-flush
+        ul(id=`HitokotoList_${theme.theme_id}`).list-group.list-group-flush
           each hitokoto in hitokotos
             if(hitokoto.theme_id === theme.theme_id)
               li(id=`Hitokoto_${hitokoto.hitokoto_id}`).list-group-item
