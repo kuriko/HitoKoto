@@ -1,3 +1,5 @@
+[![HitoKoto Test](https://github.com/kuriko/HitoKoto/actions/workflows/main.yml/badge.svg)](https://github.com/kuriko/HitoKoto/actions/workflows/main.yml)
+
 # HitoKoto について
 色々な物事を「一言」で表現してみるソーシャルサービスです。
 
