@@ -67,7 +67,8 @@ describe('テーマ：非ログイン時', () => {
     const secondPostIndex = res.text.indexOf('TestTheme_テーマ一覧が新着順で表示される2');
     expect(secondPostIndex).toBeLessThan(firstPostIndex);
 
-    Theme.destroy({ where : { theme: "TestTheme_テーマ一覧が新着順で表示される" }});
+    Theme.destroy({ where : { theme: "TestTheme_テーマ一覧が新着順で表示される1" }});
+    Theme.destroy({ where : { theme: "TestTheme_テーマ一覧が新着順で表示される2" }});
   });
 
   test('テーマを作るボタンが表示されない', async () => {
@@ -266,7 +267,7 @@ describe('HitoKoto：ログイン時', () => {
     expect(resRoot.text).toMatch(/TestHitoKoto_HitoKotoが投稿できる/);
 
     await Hitokoto.destroy({ where : { hitokoto: "TestHitoKoto_HitoKotoが投稿できる" }});
-    await Theme.destroy({ where : { theme: "TestTheme_テーマが投稿できる" }});
+    await Theme.destroy({ where : { theme: "TestTheme_HitoKotoが投稿できる" }});
   });
 
   test('自分がオーナーであるHitoKotoが削除できる', async () => {

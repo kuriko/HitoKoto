@@ -41,8 +41,8 @@ $('.createHitokoto').on('click', function() {
         'data-theme_id': hitokoto.theme.theme_id,
         'data-hitokoto_id': hitokoto.hitokoto_id
       });
-      $(`#HitokotoList_${hitokoto.theme.theme_id}`).prepend(hitokotoTemplate);
       hitokotoTemplate.show();
+      $(`#HitokotoList_${hitokoto.theme.theme_id}`).prepend(hitokotoTemplate);
 
       $(`#HitokotoInput_${data.theme_id}`).val("");
     }
